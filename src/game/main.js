@@ -17,6 +17,10 @@ const config = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
+     physics: {                 // 🔹 agregá esto
+        default: 'arcade',
+        arcade: { debug: false }
+    },
     scene: [
         Boot,
         Preloader,
