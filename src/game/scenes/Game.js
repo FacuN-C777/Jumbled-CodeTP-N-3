@@ -19,15 +19,19 @@ export class Game extends Scene {
     this.centerY = this.cameras.main.height / 2;
 
     this.player1 = new Player(this, "redCircle", 200, this.centerY, 1);
+     this.add.existing(this.player1);
     this.player2 = new Player(this, "blueCircle", 824, this.centerY, 2);
+    this.add.existing(this.player2);
+
 
     this.objects = new Objects(this);
 
-    this.physics.add.collider(this.player1.sprite, this.player2.sprite);
+  this.physics.add.collider(this.player1, this.player2);
   }
 
-  update() {
-    this.player1.update(this.objects.group);
-    this.player2.update(this.objects.group);
-  }
+  update(time, delta) {
+  const dt = delta / 1000; // ahora sí existe delta
+  this.player1.update(dt, this.objects.group);
+  this.player2.update(dt, this.objects.group);
+}
 }

@@ -1,19 +1,24 @@
 import InputSystem, { INPUT_ACTIONS } from "../utils/InputSystem.js";
 
-export default class Player extends Phaser.GameObjects.Sprite {
+export default class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, key, x, y, playerNumber = 1) {
     super(scene, x, y, key);
-    this.scene = scene;
 
-    // Crear sprite con física
-    /*this.sprite = scene.physics.add.sprite(startX, startY, texture);
-    this.sprite.setCollideWorldBounds(true);*/
+    this.scene = scene;
+    this.playerNumber = playerNumber;
     this.setScale(0.1);
+    this.moveSpeed = 200;
+    this.heldObject = null;
+    this.lastDirection = { x: 0, y: -1 };
+
+   
+    scene.add.existing(this);
+    scene.physics.add.existing(this);
+    this.setCollideWorldBounds(true);
+
+    this.inputSystem = new InputSystem(this.scene.input);
 
     if (playerNumber === 1) {
-      // Initialize InputSystem
-      this.inputSystem = new InputSystem(this.scene.input);
-
       this.inputSystem.configureKeyboard({
         [INPUT_ACTIONS.UP]: [Phaser.Input.Keyboard.KeyCodes.W],
         [INPUT_ACTIONS.DOWN]: [Phaser.Input.Keyboard.KeyCodes.S],
@@ -21,54 +26,34 @@ export default class Player extends Phaser.GameObjects.Sprite {
         [INPUT_ACTIONS.LEFT]: [Phaser.Input.Keyboard.KeyCodes.A],
         [INPUT_ACTIONS.WEST]: [Phaser.Input.Keyboard.KeyCodes.E],
       });
-
-      this.moveSpeed = 200;
-      /*this.controls = scene.input.keyboard.addKeys({
-        up: "W",
-        down: "S",
-        left: "A",
-        right: "D",
-        grab: "E",
+    } else if (playerNumber === 2) {
+     
+      this.inputSystem.configureKeyboard({
+        [INPUT_ACTIONS.UP]: [Phaser.Input.Keyboard.KeyCodes.UP],
+        [INPUT_ACTIONS.DOWN]: [Phaser.Input.Keyboard.KeyCodes.DOWN],
+        [INPUT_ACTIONS.RIGHT]: [Phaser.Input.Keyboard.KeyCodes.RIGHT],
+        [INPUT_ACTIONS.LEFT]: [Phaser.Input.Keyboard.KeyCodes.LEFT],
+        [INPUT_ACTIONS.WEST]: [Phaser.Input.Keyboard.KeyCodes.SPACE],
       });
-    } else {
-      this.controls = scene.input.keyboard.createCursorKeys();
-      this.controls.grab = scene.input.keyboard.addKey("SPACE");
-    }*/
-
-      this.heldObject = null;
-      this.lastDirection = { x: 0, y: -1 };
     }
   }
 
   handleInput(dt) {
-    // Check input and move logo
+    if (!this.inputSystem) return;
+
     let velocityX = 0;
     let velocityY = 0;
 
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.LEFT)) {
-      velocityX = -this.moveSpeed;
-    }
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.RIGHT)) {
-      velocityX = this.moveSpeed;
-    }
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.LEFT)) velocityX = -this.moveSpeed;
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.RIGHT)) velocityX = this.moveSpeed;
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.UP)) velocityY = -this.moveSpeed;
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.DOWN)) velocityY = this.moveSpeed;
 
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.UP)) {
-      velocityY = -this.moveSpeed;
-    }
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.DOWN)) {
-      velocityY = this.moveSpeed;
-    }
-
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.WEST)) {
-      velocityX = -this.moveSpeed;
-    }
-
-    this.x += velocityX * dt;
-    this.y += velocityY * dt;
+    this.setVelocity(velocityX, velocityY);
 
     if (velocityX !== 0 || velocityY !== 0) {
       this.lastDirection = {
-        x: velocityX / this.speed,
+        x: velocityX / this.moveSpeed,
         y: velocityY / this.moveSpeed,
       };
     }
@@ -88,14 +73,11 @@ export default class Player extends Phaser.GameObjects.Sprite {
   }
 
   tryGrabNearby() {
+    if (!this.scene.objects?.group) return;
+
     this.scene.objects.group.getChildren().forEach((obj) => {
       if (!this.heldObject) {
-        const distance = Phaser.Math.Distance.Between(
-          this.x,
-          this.y,
-          obj.x,
-          obj.y
-        );
+        const distance = Phaser.Math.Distance.Between(this.x, this.y, obj.x, obj.y);
         if (distance < 50) {
           this.heldObject = obj;
         }
@@ -115,7 +97,9 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
   }
 
-  update() {
-    this.handleInput();
+  update(dt) {
+    if (this.inputSystem) {
+      this.handleInput(dt);
+    }
   }
 }
