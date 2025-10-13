@@ -41,10 +41,19 @@ export class Game extends Scene {
       },
       loop: true,
     });
+
+
+
+    this.input.keyboard.on("keydown-ESC", () => {
+  this.scene.launch("PauseMenu");
+  this.scene.pause(); // Tecla esc para pausar el juego.
+});
+
+
   }
 
   update(time, delta) {
-    const dt = delta / 1000; // ahora sí existe delta
+    const dt = delta / 1000; 
     this.player1.update(dt, this.objects.group);
     this.player2.update(dt, this.objects.group);
   }
