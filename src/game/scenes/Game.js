@@ -87,6 +87,10 @@ export class Game extends Scene {
       },
     });
   }
+      this.input.keyboard.on("keydown-ESC", () => {
+  this.scene.launch("PauseMenu");
+  this.scene.pause(); // Tecla esc para pausar el juego.
+});
 
   update(time, delta) {
     const dt = delta / 1000;
