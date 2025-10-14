@@ -26,6 +26,12 @@ export class Preloader extends Scene {
     this.load.image("redCircle", "redCircle.png");
     this.load.image("blueCircle", "blueCircle.png");
     this.load.image("triangle", "Triangle.png");
+    this.load.image("television", "tv.jpg");
+    this.load.image("computer", "pc.jpg");
+    this.load.image("headphones", "headphones.jpg");
+    this.load.image("washingMachine", "washingmachine.jpg");
+    this.load.tilemapTiledJSON("betaMapCoop", "tilemaps/mapaBeta3.json");
+    this.load.image("tiles", "paredesPlaceholder.png");
   }
 
   create() {
