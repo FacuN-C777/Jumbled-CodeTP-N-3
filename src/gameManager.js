@@ -6,8 +6,9 @@ class GameManager {
       return GameManager.instance;
     }
     this.moneyCount = 0;
-    this.playerLives = 5;
-    this.isInnmune = false;
+    this.totalMoney = 0;
+    this.round = 1;
+    this.moneyGoal = 200;
     GameManager.instance = this;
   }
 
@@ -18,33 +19,43 @@ class GameManager {
     return GameManager.instance;
   }
 
-  addMoney() {
-    this.moneyCount++;
+  addMoney(amount) {
+    this.moneyCount += amount;
+    this.totalMoney += amount;
   }
 
   getMoney() {
     return this.moneyCount;
   }
 
+  getTotalMoney() {
+    return this.totalMoney;
+  }
+
   resetMoney() {
     this.moneyCount = 0;
   }
 
-  setPlayerLives(lives) {
-    this.playerLives = lives;
+  setMoneyGoal(goal) {
+    this.moneyGoal = goal;
   }
 
-  getPlayerLives() {
-    return this.playerLives;
+  getMoneyGoal() {
+    return this.moneyGoal;
   }
 
-  losePlayerLife() {
-    if (this.isInnmune) return;
-    this.playerLives = Math.max(0, this.playerLives - 1);
+  setRound(round) {
+    this.round = round;
   }
 
-  resetPlayerLives() {
-    this.playerLives = 5;
+  getRound() {
+    return this.round;
+  }
+
+  nextRound() {
+    this.round++;
+    this.resetMoney();
+    this.moneyGoal += 1000; // Increase goal per round (optional)
   }
 }
 

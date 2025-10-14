@@ -11,7 +11,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.heldObject = null;
     this.lastDirection = { x: 0, y: -1 };
 
-   
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setCollideWorldBounds(true);
@@ -27,7 +26,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         [INPUT_ACTIONS.WEST]: [Phaser.Input.Keyboard.KeyCodes.E],
       });
     } else if (playerNumber === 2) {
-     
       this.inputSystem.configureKeyboard({
         [INPUT_ACTIONS.UP]: [Phaser.Input.Keyboard.KeyCodes.UP],
         [INPUT_ACTIONS.DOWN]: [Phaser.Input.Keyboard.KeyCodes.DOWN],
@@ -44,10 +42,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     let velocityX = 0;
     let velocityY = 0;
 
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.LEFT)) velocityX = -this.moveSpeed;
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.RIGHT)) velocityX = this.moveSpeed;
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.UP)) velocityY = -this.moveSpeed;
-    if (this.inputSystem.isPressed(INPUT_ACTIONS.DOWN)) velocityY = this.moveSpeed;
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.LEFT))
+      velocityX = -this.moveSpeed;
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.RIGHT))
+      velocityX = this.moveSpeed;
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.UP))
+      velocityY = -this.moveSpeed;
+    if (this.inputSystem.isPressed(INPUT_ACTIONS.DOWN))
+      velocityY = this.moveSpeed;
 
     this.setVelocity(velocityX, velocityY);
 
@@ -65,7 +67,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this.inputSystem.isJustPressed(INPUT_ACTIONS.WEST)) {
       if (this.heldObject) {
-        this.launchObject();
+        // Try to deliver to nearby client first
+        if (this.tryDeliverToClient()) {
+          this.heldObject = null;
+        } else {
+          this.launchObject();
+        }
       } else {
         this.tryGrabNearby();
       }
@@ -77,12 +84,38 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.scene.objects.group.getChildren().forEach((obj) => {
       if (!this.heldObject) {
-        const distance = Phaser.Math.Distance.Between(this.x, this.y, obj.x, obj.y);
+        const distance = Phaser.Math.Distance.Between(
+          this.x,
+          this.y,
+          obj.x,
+          obj.y
+        );
         if (distance < 50) {
           this.heldObject = obj;
         }
       }
     });
+  }
+
+  tryDeliverToClient() {
+    if (!this.scene.clientsGroup) return false;
+    let delivered = false;
+    this.scene.clientsGroup.getChildren().forEach((client) => {
+      const distance = Phaser.Math.Distance.Between(
+        this.x,
+        this.y,
+        client.x,
+        client.y
+      );
+      if (
+        distance < 60 &&
+        this.heldObject &&
+        client.tryDeliverObject(this.heldObject)
+      ) {
+        delivered = true;
+      }
+    });
+    return delivered;
   }
 
   launchObject() {
