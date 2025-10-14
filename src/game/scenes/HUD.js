@@ -17,6 +17,13 @@ export class HUD extends Scene {
     });
     this.moneyText.setScrollFactor(0);
 
+    this.totalMoneyText = this.add.text(20, 50, "Total : 0", {
+      fontSize: "20px",
+      color: "#444",
+      fontFamily: "Arial",
+    });
+    this.totalMoneyText.setScrollFactor(0);
+
     // Texto de la ronda actual
     this.roundText = this.add.text(this.scale.width / 2, 20, "Ronda 0", {
       fontSize: "24px",
@@ -25,11 +32,27 @@ export class HUD extends Scene {
     });
     this.roundText.setScrollFactor(0);
 
+    // Texto del objetivo de la ronda actual
+    this.roundGoalText = this.add.text(this.scale.width / 2, 50, "Meta: 0", {
+      fontSize: "20px",
+      color: "#222",
+      fontFamily: "Arial",
+    });
+    this.roundGoalText.setScrollFactor(0);
+
+    // Texto del intervalo de la ronda actual
+    this.roundIntervalText = this.add.text(this.scale.width / 2, 80, "", {
+      fontSize: "20px",
+      color: "#990000",
+      fontFamily: "Arial",
+    });
+    this.roundIntervalText.setScrollFactor(0);
+
     // Texto del tiempo restante de la ronda actual
     this.roundTimerText = this.add.text(
       this.scale.width / 2,
-      50,
-      "Tiempo restante : 0",
+      110,
+      `Tiempo Restante: ${this.roundTimeLeft}`,
       {
         fontSize: "24px",
         color: "#000000ff",
@@ -39,19 +62,33 @@ export class HUD extends Scene {
     this.roundTimerText.setScrollFactor(0);
   }
 
-  updatemoney(count) {
+  updateMoney(count) {
     this.moneyCount = count;
-    this.moneyText.setText(`Ronda ${this.moneyCount}`);
+    if (this.moneyText) this.moneyText.setText(`Dinero : ${this.moneyCount}`);
+  }
+
+  updateTotalMoney(total) {
+    if (this.totalMoneyText) this.totalMoneyText.setText(`Total : ${total}`);
   }
 
   updateRound(count) {
     this.roundCount = count;
-    this.moneyText.setText(`Ronda ${this.roundCount}`);
+    if (this.roundText) this.roundText.setText(`Ronda ${this.roundCount}`);
+  }
+
+  updateRoundGoal(goal) {
+    if (this.roundGoalText) this.roundGoalText.setText(`Meta: ${goal}`);
+  }
+
+  updateRoundInterval(isInterval) {
+    if (this.roundIntervalText)
+      this.roundIntervalText.setText(isInterval ? "¡Nueva ronda pronto!" : "");
   }
 
   updateRoundTimer(count) {
     this.roundTimeLeft = count;
-    this.roundTimerText.setText(`Tiempo Restante: ${this.roundTimeLeft}`);
+    if (this.roundTimerText)
+      this.roundTimerText.setText(`Tiempo Restante: ${this.roundTimeLeft}`);
   }
 }
 

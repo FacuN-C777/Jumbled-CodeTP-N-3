@@ -10,12 +10,12 @@ export class orderState extends State {
     this.clients = params.clients;
   }
 
-  update(dt) {}
+  update(delta) {}
 
   finish() {}
 }
 
-class waitState extends State {
+export class waitState extends State {
   init(params) {
     this.clients = params.clients;
   }
@@ -25,7 +25,7 @@ class waitState extends State {
   finish() {}
 }
 
-class leaveState extends State {
+export class leaveState extends State {
   init(params) {
     this.clients = params.clients;
   }

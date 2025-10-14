@@ -7,7 +7,7 @@ export default class Objects {
     this.height = this.scene.cameras.main.height;
 
     this.scene.time.addEvent({
-      delay: 4000,
+      delay: 2000,
       loop: true,
       callback: () => this.spawnOne(),
     });
@@ -16,7 +16,13 @@ export default class Objects {
   spawnOne() {
     const x = Phaser.Math.Between(50, this.width - 50);
     const y = Phaser.Math.Between(50, this.height - 50);
-    let type = Phaser.Math.RND.pick("phone", "triangle");
+    let type = Phaser.Math.RND.pick(
+      "phone",
+      "computer",
+      "television",
+      "headphones",
+      "washingMachine"
+    );
 
     const obj = this.scene.physics.add.sprite(x, y, type);
     obj.setScale(0.15);
@@ -25,8 +31,14 @@ export default class Objects {
     obj.body.setBounce(0.05);
     if (type == "phone") {
       obj.value = 50;
-    } else {
+    } else if (type == "computer") {
       obj.value = 100;
+    } else if (type == "television") {
+      obj.value = 75;
+    } else if (type == "headphones") {
+      obj.value = 50;
+    } else if (type == "washingMachine") {
+      obj.value = 150;
     }
 
     this.group.add(obj);
