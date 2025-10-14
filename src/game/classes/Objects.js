@@ -16,13 +16,15 @@ export default class Objects {
   spawnOne() {
     const x = Phaser.Math.Between(50, this.width - 50);
     const y = Phaser.Math.Between(50, this.height - 50);
-    let type = Phaser.Math.RND.pick(
+    let type = Phaser.Math.RND.pick([
       "phone",
       "computer",
       "television",
       "headphones",
-      "washingMachine"
-    );
+      "washingMachine",
+    ]);
+
+    console.log(type);
 
     const obj = this.scene.physics.add.sprite(x, y, type);
     obj.setScale(0.15);
