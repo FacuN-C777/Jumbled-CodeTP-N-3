@@ -5,6 +5,7 @@ export default class Objects {
 
     this.width = this.scene.cameras.main.width;
     this.height = this.scene.cameras.main.height;
+     this.sonidoSpawn = this.scene.sound.add('spawnObjects');
 
     this.scene.time.addEvent({
       delay: 2000,
@@ -44,6 +45,7 @@ export default class Objects {
     }
 
     this.group.add(obj);
+    this.sonidoSpawn.play();
 
     this.scene.tweens.add({
       targets: obj,

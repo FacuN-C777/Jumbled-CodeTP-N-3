@@ -14,6 +14,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setCollideWorldBounds(true);
+    this.stepSound = this.scene.sound.add("stepsPlayer", { loop: true, volume: 1 });
 
     this.inputSystem = new InputSystem(this.scene.input);
 
@@ -34,8 +35,33 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         [INPUT_ACTIONS.WEST]: [Phaser.Input.Keyboard.KeyCodes.SPACE],
       });
     }
+    this.scene.time.delayedCall(100, () => {
+  if (!this.scene.input.gamepad) return;
+
+  const pads = this.scene.input.gamepad?.pads || [];
+  this.inputSystem.gamepad = pads[playerNumber - 1] || null;
+
+  // Escuchar nuevas conexiones de mandos(chatgpt)
+  this.scene.input.gamepad.on('connected', (pad) => {
+    if (pad.index === playerNumber - 1) {
+      this.inputSystem.gamepad = pad;
+      console.log(`🎮 Gamepad asignado al jugador ${playerNumber}: ${pad.id}`);
+    }
+  });
+
+  this.scene.input.gamepad.on('disconnected', (pad) => {
+    if (pad.index === playerNumber - 1) {
+      this.inputSystem.gamepad = null;
+      console.log(`❌ Gamepad del jugador ${playerNumber} desconectado`);
+    }
+  });
+});
   }
 
+
+
+
+  
   handleInput(dt) {
     if (!this.inputSystem) return;
 
@@ -59,6 +85,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         y: velocityY / this.moveSpeed,
       };
     }
+
 
     if (this.heldObject) {
       this.heldObject.x = this.x;
@@ -126,13 +153,31 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.lastDirection.x * throwSpeed,
         this.lastDirection.y * throwSpeed
       );
+       this.scene.sound.play('launchObjects');
       this.heldObject = null;
     }
+
+    
+     
   }
 
   update(dt) {
     if (this.inputSystem) {
       this.handleInput(dt);
     }
+    if (this.stepSound && this.body) {
+    if (this.body.velocity.x !== 0 || this.body.velocity.y !== 0) {
+      if (!this.stepSound.isPlaying) {
+        this.stepSound.play();
+      }
+    } else {
+      if (this.stepSound.isPlaying) {
+        this.stepSound.stop();
+      }
+    }
   }
+  }
+
+
+  
 }
