@@ -165,7 +165,7 @@
                 {
                  "height":0,
                  "id":11,
-                 "name":"",
+                 "name":"cliente3",
                  "point":true,
                  "rotation":0,
                  "type":"clients-spawn",
@@ -177,7 +177,7 @@
                 {
                  "height":0,
                  "id":12,
-                 "name":"",
+                 "name":"cliente2",
                  "point":true,
                  "rotation":0,
                  "type":"clients-spawn",
@@ -189,7 +189,7 @@
                 {
                  "height":0,
                  "id":13,
-                 "name":"",
+                 "name":"cliente1",
                  "point":true,
                  "rotation":0,
                  "type":"clients-spawn",

@@ -14,6 +14,9 @@ export default class Objects {
   }
 
   spawnOne() {
+    // don't spawn if we've reached the max active objects
+    if (this.group.getLength() >= 6) return;
+
     const x = Phaser.Math.Between(50, this.width - 50);
     const y = Phaser.Math.Between(50, this.height - 50);
     let type = Phaser.Math.RND.pick([
@@ -23,7 +26,6 @@ export default class Objects {
       "headphones",
       "washingMachine",
     ]);
-
     console.log(type);
 
     const obj = this.scene.physics.add.sprite(x, y, type);

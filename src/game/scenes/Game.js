@@ -80,6 +80,7 @@ export class Game extends Scene {
       delay: 3000,
       loop: true,
       callback: () => {
+        if (this.clientsGroup.getLength() >= 3) return;
         const x = Phaser.Math.Between(100, this.cameras.main.width - 100);
         const y = Phaser.Math.Between(100, this.cameras.main.height - 100);
         const client = new clients(this, x, y, "triangle").setScale(0.1);
