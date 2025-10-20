@@ -32,6 +32,10 @@ export class Preloader extends Scene {
     this.load.image("washingMachine", "washingmachine.jpg");
     this.load.tilemapTiledJSON("betaMapCoop", "tilemaps/mapaBeta3.json");
     this.load.image("tiles", "paredesPlaceholder.png");
+    this.load.audio("cashsound","sounds/cash-register-kaching-376867.mp3")
+    this.load.audio("spawnObjects","sounds/pop-cartoon-328167.mp3")
+    this.load.audio("stepsPlayer","sounds/pasos-al-caminar-80084.mp3")
+    this.load.audio("launchObjects","sounds/swing-whoosh-5-198498.mp3")
   }
 
   create() {

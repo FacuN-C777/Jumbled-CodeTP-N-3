@@ -60,11 +60,17 @@ export class HUD extends Scene {
       }
     );
     this.roundTimerText.setScrollFactor(0);
+
+   
   }
+
+
+ 
 
   updateMoney(count) {
     this.moneyCount = count;
     if (this.moneyText) this.moneyText.setText(`Dinero : ${this.moneyCount}`);
+    
   }
 
   updateTotalMoney(total) {

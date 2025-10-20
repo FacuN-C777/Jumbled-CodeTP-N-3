@@ -52,6 +52,11 @@ export class clients extends Phaser.GameObjects.Sprite {
     if (idx !== -1) {
       this.order.splice(idx, 1);
       GameManager.getInstance().addMoney(obj.value);
+
+       if (this.scene.sonidoDinero) {
+            this.scene.sonidoDinero.play();
+        }
+
       if (this.order.length === 0) {
         this.leave();
       } else {

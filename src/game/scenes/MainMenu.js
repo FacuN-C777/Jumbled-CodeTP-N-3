@@ -31,6 +31,7 @@ export class MainMenu extends Scene
 
         this.createButton(512, 305, "Jugar", () => {
           if (this.selectedMode === "Cooperativo") {
+           this.sound.context.resume();
             this.scene.start("Game");
           } else {
            this.scene.start("GameOver");

@@ -91,6 +91,8 @@ export class Game extends Scene {
       this.scene.launch("PauseMenu");
       this.scene.pause(); // Tecla esc para pausar el juego.
     });
+
+      this.sonidoDinero = this.sound.add('cashsound');
   }
 
   update(time, delta) {
