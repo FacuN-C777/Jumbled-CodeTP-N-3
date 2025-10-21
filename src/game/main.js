@@ -1,10 +1,10 @@
-import { Boot } from './scenes/Boot';
-import { Game as MainGame } from './scenes/Game';
-import { GameOver } from './scenes/GameOver';
-import { MainMenu } from './scenes/MainMenu';
-import { Preloader } from './scenes/Preloader';
+import { Boot } from "./scenes/Boot";
+import { Game as MainGame } from "./scenes/Game";
+import { GameOver } from "./scenes/GameOver";
+import { MainMenu } from "./scenes/MainMenu";
+import { Preloader } from "./scenes/Preloader";
 import { PauseMenu } from "./scenes/PauseMenu";
-import { AUTO, Game, Input } from "phaser";
+import { AUTO, Game } from "phaser";
 import { HUD } from "./scenes/HUD";
 
 //  Find out more information about the Game Config at:
@@ -15,7 +15,7 @@ const config = {
   height: 768,
   parent: "game-container",
   backgroundColor: "#028af8",
-  Input: { Gamepad: true,gamepad: true },
+  input: { gamepad: true },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

@@ -5,7 +5,7 @@ export default class Objects {
 
     this.width = this.scene.cameras.main.width;
     this.height = this.scene.cameras.main.height;
-     this.sonidoSpawn = this.scene.sound.add('spawnObjects');
+    this.sonidoSpawn = this.scene.sound.add("spawnObjects");
 
     this.scene.time.addEvent({
       delay: 2000,
@@ -14,35 +14,71 @@ export default class Objects {
     });
   }
 
+  // Find an object spawn (from tilemap objects) that isn't too close to existing objects.
+  getAvailableObjectSpawn(minDistance = 48) {
+    const spawns = Array.isArray(this.scene.objectSpawnLocations)
+      ? this.scene.objectSpawnLocations
+      : [];
+    if (spawns.length === 0) return null;
+
+    const candidates = Phaser.Utils.Array.Shuffle(spawns.slice());
+
+    for (let i = 0; i < candidates.length; i++) {
+      const s = candidates[i];
+      if (typeof s.x !== "number" || typeof s.y !== "number") continue;
+
+      let occupied = false;
+      this.group.getChildren().forEach((o) => {
+        if (Phaser.Math.Distance.Between(s.x, s.y, o.x, o.y) < minDistance) {
+          occupied = true;
+        }
+      });
+
+      if (!occupied) return s;
+    }
+
+    return null;
+  }
+
   spawnOne() {
     // don't spawn if we've reached the max active objects
     if (this.group.getLength() >= 6) return;
 
-    const x = Phaser.Math.Between(50, this.width - 50);
-    const y = Phaser.Math.Between(50, this.height - 50);
+    // Prefer tilemap-defined object spawn locations that aren't occupied
+    let spawn = this.getAvailableObjectSpawn(48);
+
+    const x =
+      spawn && typeof spawn.x === "number"
+        ? spawn.x
+        : Phaser.Math.Between(50, this.width - 50);
+    const y =
+      spawn && typeof spawn.y === "number"
+        ? spawn.y
+        : Phaser.Math.Between(50, this.height - 50);
+
     let type = Phaser.Math.RND.pick([
-      "phone",
-      "computer",
+      "telefono",
+      "computadora",
       "television",
-      "headphones",
-      "washingMachine",
+      "audifonos",
+      "lavarropa",
     ]);
     console.log(type);
 
     const obj = this.scene.physics.add.sprite(x, y, type);
-    obj.setScale(0.15);
+    obj.setScale(1.5);
     obj.setAlpha(0);
     obj.body.setCollideWorldBounds(true);
     obj.body.setBounce(0.05);
-    if (type == "phone") {
+    if (type == "telefono") {
       obj.value = 50;
-    } else if (type == "computer") {
+    } else if (type == "computadora") {
       obj.value = 100;
     } else if (type == "television") {
       obj.value = 75;
-    } else if (type == "headphones") {
+    } else if (type == "audifonos") {
       obj.value = 50;
-    } else if (type == "washingMachine") {
+    } else if (type == "lavarropa") {
       obj.value = 150;
     }
 
@@ -52,7 +88,6 @@ export default class Objects {
     this.scene.tweens.add({
       targets: obj,
       alpha: 1,
-      scale: 0.18,
       duration: 400,
       ease: "Back.Out",
     });
@@ -65,7 +100,7 @@ export default class Objects {
     });
 
     //timer de existencia de los objetos
-    this.scene.time.delayedCall(20000, () => {
+    this.scene.time.delayedCall(12000, () => {
       this.scene.tweens.add({
         targets: obj,
         alpha: 0,

@@ -140,13 +140,18 @@ export default class InputSystem {
   initializeGamepad() {
     // Inicializar gamepad si está disponible
     if (this.input.gamepad) {
+      // If pads already present, keep first one as default (player code may override)
+      const pads = this.input.gamepad.pads || [];
+      if (pads.length > 0 && pads[0]) this.gamepad = pads[0];
+
       this.input.gamepad.on("connected", (pad) => {
         this.gamepad = pad;
         console.log("Gamepad conectado:", pad.id);
       });
 
       this.input.gamepad.on("disconnected", (pad) => {
-        this.gamepad = null;
+        if (this.gamepad && this.gamepad.index === pad.index)
+          this.gamepad = null;
         console.log("Gamepad desconectado");
       });
     }
@@ -288,12 +293,12 @@ export default class InputSystem {
 
     return this.mapping[action].gamepad.some((input) => {
       if (input.type === "button") {
-        return (
-          this.gamepad.buttons[input.index] &&
-          this.gamepad.buttons[input.index].pressed
-        );
+        const btn = this.gamepad.buttons && this.gamepad.buttons[input.index];
+        return btn ? !!btn.pressed : false;
       } else if (input.type === "axis") {
-        const axisValue = this.gamepad.axes[input.index].getValue();
+        const axis = this.gamepad.axes && this.gamepad.axes[input.index];
+        if (!axis || typeof axis.getValue !== "function") return false;
+        const axisValue = axis.getValue();
         return input.dir > 0 ? axisValue > 0.5 : axisValue < -0.5;
       }
       return false;
@@ -315,11 +320,14 @@ export default class InputSystem {
 
     return this.mapping[action].gamepad.some((input) => {
       if (input.type === "button") {
-        const button = this.gamepad.buttons[input.index];
-        return button && button.pressed && button.duration < 100; // Umbral de just pressed
+        const button =
+          this.gamepad.buttons && this.gamepad.buttons[input.index];
+        return button ? button.pressed && (button.duration || 0) < 100 : false;
       } else if (input.type === "axis") {
         // Para ejes, necesitamos rastrear el estado anterior (enfoque simplificado)
-        const axisValue = this.gamepad.axes[input.index].getValue();
+        const axis = this.gamepad.axes && this.gamepad.axes[input.index];
+        if (!axis || typeof axis.getValue !== "function") return false;
+        const axisValue = axis.getValue();
         const threshold = 0.5;
         const isPressed =
           input.dir > 0 ? axisValue > threshold : axisValue < -threshold;

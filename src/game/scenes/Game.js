@@ -14,8 +14,10 @@ export class Game extends Scene {
 
   create() {
     const map = this.make.tilemap({ key: "betaMapCoop" });
-    const paredes = map.addTilesetImage("wallsBeta", "tiles");
+    const paredes = map.addTilesetImage("wallsFinal", "wallTiles");
+    const muebles = map.addTilesetImage("furniture", "furnitureTiles");
     const wallLayer = map.createLayer("Paredes", paredes, 0, 0);
+    const furnitureLayer = map.createLayer("Muebles", muebles, 0, 0);
     const objectsLayer = map.getObjectLayer("Objetos");
     //Getting player spawn location
     const spawnPoint1 = map.findObject(
@@ -28,71 +30,132 @@ export class Game extends Scene {
     );
     this.cameras.main.setBackgroundColor(0x111111);
     this.centerY = this.cameras.main.height / 2;
-    this.player1 = new Player(
-      this,
-      "redCircle",
-      spawnPoint1.x,
-      spawnPoint1.y,
-      1
-    );
+    this.player1 = new Player(this, "p1", spawnPoint1.x, spawnPoint1.y, 1);
     this.add.existing(this.player1);
-    this.player2 = new Player(
-      this,
-      "blueCircle",
-      spawnPoint2.x,
-      spawnPoint2.y,
-      2
-    );
+    this.player2 = new Player(this, "p2", spawnPoint2.x, spawnPoint2.y, 2);
     this.add.existing(this.player2);
+    this.ClientSpawnLocations = [];
+    this.objectSpawnLocations = [];
+    // find colectable-type objects in object layer & add to array
+    objectsLayer.objects.forEach((objData) => {
+      const { x = 0, y = 0, name, type } = objData;
+      switch (type) {
+        case "objects_spawn": {
+          //Getting posible locations for collectibles to spawn
+          this.objectSpawnLocations.push(objData);
+          break;
+        }
+        case "clients_spawn": {
+          //Getting posible locations for collectibles to spawn
+          this.ClientSpawnLocations.push(objData);
+          break;
+        }
+      }
+    });
+    // Centralize gamepad handling:
+    if (this.input && this.input.gamepad) {
+      const gp = this.input.gamepad;
+      // Remove any previously registered connected/disconnected listeners
+      if (typeof gp.removeAllListeners === "function") {
+        gp.removeAllListeners("connected");
+        gp.removeAllListeners("disconnected");
+      }
+
+      // Helper: try to assign Phaser-wrapped pads to players, retry a few times
+      const tryAssignPads = (() => {
+        let attempts = 0;
+        return () => {
+          attempts++;
+          const pads = gp.pads || [];
+          if (pads.length > 0 || attempts > 10) {
+            // assign if available, otherwise null
+            this.player1.inputSystem.gamepad = pads[0] || null;
+            this.player2.inputSystem.gamepad = pads[1] || null;
+            return;
+          }
+          // wait a bit for Phaser to wrap connected pads
+          this.time.delayedCall(100, tryAssignPads);
+        };
+      })();
+      tryAssignPads();
+
+      // Register centralized handlers that map pad index to the correct player
+      gp.on("connected", (pad) => {
+        if (pad.index === 0) this.player1.inputSystem.gamepad = pad;
+        if (pad.index === 1) this.player2.inputSystem.gamepad = pad;
+      });
+      gp.on("disconnected", (pad) => {
+        if (pad.index === 0) this.player1.inputSystem.gamepad = null;
+        if (pad.index === 1) this.player2.inputSystem.gamepad = null;
+      });
+    }
     wallLayer.setCollisionByProperty({ colisionable: true });
+    furnitureLayer.setCollisionByProperty({ colisionable: true });
     this.physics.add.collider(this.player1, wallLayer);
     this.physics.add.collider(this.player2, wallLayer);
+    this.physics.add.collider(this.player1, furnitureLayer);
+    this.physics.add.collider(this.player2, furnitureLayer);
     this.objects = new Objects(this);
+    this.physics.add.collider(this.objects, wallLayer);
     this.clientsGroup = this.add.group();
     this.physics.add.collider(this.player1, this.player2);
     // HUD
+    // ensure any existing HUD is stopped (prevents persistence across scenes), then launch fresh
+    if (this.scene.isActive("HUD")) {
+      this.scene.stop("HUD");
+    }
     this.scene.launch("HUD");
     this.hud = this.scene.get("HUD");
-    //timer config
-    this.timeLeft = 120;
-    this.timer = this.time.addEvent({
-      delay: 1000,
-      callback: () => {
-        this.timeLeft--;
-        // Update HUD round timer
-        if (this.hud) {
-          this.hud.updateRoundTimer(this.timeLeft);
-        }
-        if (this.timeLeft <= 0) {
-          this.scene.start("GameOver", { score: this.score });
-        }
-      },
-      loop: true,
+    // when this Game scene shuts down, stop the HUD so it doesn't linger
+    this.events.on("shutdown", () => {
+      if (this.scene.isActive("HUD")) this.scene.stop("HUD");
+      // stop coop music if playing
+      if (this.coopMusic && this.coopMusic.isPlaying) this.coopMusic.stop();
     });
-    this.roundActive = true;
-    this.roundInterval = false;
-    this.roundTime = 120;
-    this.intervalTime = 15;
-    this.timeLeft = this.roundTime;
-    this.startRoundTimer();
+
+    // stop menu music if still playing, then play coop theme looped
+    try {
+      this.sound.stopByKey("MainMenuMusic");
+    } catch (e) {}
+    this.coopMusic = this.sound.add("CoopModeMusic", {
+      loop: true,
+      volume: 0.2,
+    });
+    try {
+      this.coopMusic.play();
+    } catch (e) {}
+
+    this.sonidoDinero = this.sound.add("cashsound");
+
     // Spawn clients periodically
     this.time.addEvent({
       delay: 3000,
       loop: true,
       callback: () => {
-        if (this.clientsGroup.getLength() >= 3) return;
-        const x = Phaser.Math.Between(100, this.cameras.main.width - 100);
-        const y = Phaser.Math.Between(100, this.cameras.main.height - 100);
-        const client = new clients(this, x, y, "triangle").setScale(0.1);
-        this.clientsGroup.add(client);
+        // delegate spawning to the clients class (it will check tilemap spawns and proximity)
+        clients.spawn(this, 48);
       },
     });
+
+    // Pause handling: ESC launches PauseMenu and pauses this scene; pause music as well.
     this.input.keyboard.on("keydown-ESC", () => {
       this.scene.launch("PauseMenu");
-      this.scene.pause(); // Tecla esc para pausar el juego.
+      this.scene.pause(); // pause this Game scene
+      if (this.coopMusic && this.coopMusic.isPlaying) {
+        try {
+          this.coopMusic.pause();
+        } catch (e) {}
+      }
     });
 
-      this.sonidoDinero = this.sound.add('cashsound');
+    // When this scene is resumed (e.g. from PauseMenu), resume coop music if it was paused.
+    this.events.on("resume", () => {
+      if (this.coopMusic && this.coopMusic.isPaused) {
+        try {
+          this.coopMusic.resume();
+        } catch (e) {}
+      }
+    });
   }
 
   update(time, delta) {
@@ -103,8 +166,9 @@ export class Game extends Scene {
     this.clientsGroup.getChildren().forEach((client) => client.update(dt));
     // Update HUD money and round info
     if (this.hud) {
+      // only update current money (used for round goal)
       this.hud.updateMoney(GameManager.getInstance().getMoney());
-      this.hud.updateTotalMoney(GameManager.getInstance().getTotalMoney());
+      // removed: this.hud.updateTotalMoney(...)
       this.hud.updateRound(GameManager.getInstance().getRound());
       this.hud.updateRoundGoal(GameManager.getInstance().getMoneyGoal());
     }
@@ -148,6 +212,10 @@ export class Game extends Scene {
       GameManager.getInstance().getMoney() <
       GameManager.getInstance().getMoneyGoal()
     ) {
+      // stop coop music when going to game over
+      try {
+        if (this.coopMusic && this.coopMusic.isPlaying) this.coopMusic.stop();
+      } catch (e) {}
       this.scene.start("GameOver", {
         score: GameManager.getInstance().getTotalMoney(),
       });

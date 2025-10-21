@@ -1,14 +1,12 @@
 import Phaser from "phaser";
-/*import { StateMachine } from "../states/stateMachine.js";
-import { orderState, waitState, leaveState } from "../states/clientStates.js";*/
 import GameManager from "../../gameManager.js";
 
 const OBJECT_TYPES = [
-  "phone",
-  "computer",
+  "telefono",
+  "computadora",
   "television",
-  "headphones",
-  "washingMachine",
+  "audifonos",
+  "lavarropa",
 ];
 
 export class clients extends Phaser.GameObjects.Sprite {
@@ -16,12 +14,6 @@ export class clients extends Phaser.GameObjects.Sprite {
     super(scene, x, y, key);
     this.scene = scene;
     this.scene.add.existing(this);
-
-    /*this.StateMachine = new StateMachine("ordering");
-    this.StateMachine.addState("ordering", new orderState(this));
-    this.StateMachine.addState("waiting", new waitState(this));
-    this.StateMachine.addState("leaving", new leaveState(this));
-    this.StateMachine.changeState("ordering", { clients: this });*/
 
     this.generateOrder();
     this.fulfilled = [];
@@ -38,11 +30,21 @@ export class clients extends Phaser.GameObjects.Sprite {
 
   displayOrder() {
     if (this.orderText) this.orderText.destroy();
+
+    // split order into two roughly equal lines to avoid clipping with nearby clients
+    const splitIndex = Math.ceil(this.order.length / 2);
+    const firstLine = this.order.slice(0, splitIndex).join(", ");
+    const secondLine = this.order.slice(splitIndex).join(", ");
+    const textContent = secondLine
+      ? `Pedido:\n${firstLine}\n${secondLine}`
+      : `Pedido: ${firstLine}`;
+
     this.orderText = this.scene.add
-      .text(this.x, this.y - 40, "Pedido: " + this.order.join(", "), {
-        fontSize: "18px",
-        color: "#ffffffff",
-        fontFamily: "Arial",
+      .text(this.x, this.y - 40, textContent, {
+        fontSize: "20px",
+        color: "#013005ff",
+        fontFamily: '"Press Start 2P", monospace',
+        align: "center",
       })
       .setOrigin(0.5);
   }
@@ -53,9 +55,9 @@ export class clients extends Phaser.GameObjects.Sprite {
       this.order.splice(idx, 1);
       GameManager.getInstance().addMoney(obj.value);
 
-       if (this.scene.sonidoDinero) {
-            this.scene.sonidoDinero.play();
-        }
+      if (this.scene.sonidoDinero) {
+        this.scene.sonidoDinero.play();
+      }
 
       if (this.order.length === 0) {
         this.leave();
@@ -70,15 +72,73 @@ export class clients extends Phaser.GameObjects.Sprite {
 
   leave() {
     if (this.orderText) this.orderText.destroy();
-    //this.StateMachine.changeState("leaving", { clients: this });
     this.scene.time.delayedCall(400, () => this.destroy());
   }
 
   update(dt) {
-    //this.StateMachine.update(dt);
     if (this.orderText) {
       this.orderText.x = this.x;
       this.orderText.y = this.y - 40;
     }
+  }
+
+  // Pick a tilemap client spawn that isn't within minDistance of existing clients.
+  static _getAvailableSpawn(scene, minDistance = 48) {
+    const spawns = Array.isArray(scene.ClientSpawnLocations)
+      ? scene.ClientSpawnLocations
+      : [];
+    if (spawns.length === 0) return null;
+
+    const candidates = Phaser.Utils.Array.Shuffle(spawns.slice());
+    for (let i = 0; i < candidates.length; i++) {
+      const s = candidates[i];
+      if (typeof s.x !== "number" || typeof s.y !== "number") continue;
+
+      let occupied = false;
+      const children =
+        scene.clientsGroup && scene.clientsGroup.getChildren
+          ? scene.clientsGroup.getChildren()
+          : [];
+      children.forEach((c) => {
+        if (Phaser.Math.Distance.Between(s.x, s.y, c.x, c.y) < minDistance) {
+          occupied = true;
+        }
+      });
+
+      if (!occupied) return s;
+    }
+    return null;
+  }
+
+  // Spawn a client into the scene (adds to scene.clientsGroup). Handles tilemap spawns and fallback.
+  static spawn(scene, minDistance = 48) {
+    if (!scene) return null;
+    if (!scene.clientsGroup) return null;
+    if (scene.clientsGroup.getLength() >= 3) return null;
+
+    let spawn = this._getAvailableSpawn(scene, minDistance);
+
+    const x =
+      spawn && typeof spawn.x === "number"
+        ? spawn.x
+        : Phaser.Math.Between(100, scene.cameras.main.width - 100);
+    const y =
+      spawn && typeof spawn.y === "number"
+        ? spawn.y
+        : Phaser.Math.Between(100, scene.cameras.main.height - 100);
+
+    const client = new clients(scene, x, y, "client");
+    scene.clientsGroup.add(client);
+
+    // Play the same spawn sound used for objects (falls back if not loaded)
+    if (scene.sound && scene.sound.play) {
+      try {
+        scene.sound.play("spawnObjects");
+      } catch (e) {
+        // ignore if sound not available
+      }
+    }
+
+    return client;
   }
 }
