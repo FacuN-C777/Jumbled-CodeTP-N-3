@@ -96,7 +96,7 @@ export class Game extends Scene {
     this.physics.add.collider(this.player1, furnitureLayer);
     this.physics.add.collider(this.player2, furnitureLayer);
     this.objects = new Objects(this);
-    this.physics.add.collider(this.objects, wallLayer);
+    this.physics.add.collider(this.objects.group, wallLayer);
     this.clientsGroup = this.add.group();
     this.physics.add.collider(this.player1, this.player2);
     // HUD
