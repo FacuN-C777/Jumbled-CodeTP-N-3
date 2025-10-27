@@ -6,7 +6,7 @@ export class PauseMenu extends Scene {
   }
 
   create() {
-   
+   this.scene.bringToTop();
     const panel = this.add.rectangle(512, 384, 400, 300, 0x000000, 0.6)
       .setStrokeStyle(3, 0x00ffff)
       .setOrigin(0.5);
@@ -41,19 +41,29 @@ export class PauseMenu extends Scene {
 
 
     this.createButton(512, 360, "Reanudar", () => {
-      this.scene.resume("Game");
-      this.scene.stop("PauseMenu");
-    });
+  if (this.scene.isPaused("Game")) this.scene.resume("Game");
+  if (this.scene.isPaused("Versus")) this.scene.resume("Versus");
+  this.scene.stop("PauseMenu");
+});
 
-    this.createButton(512, 420, "Reiniciar", () => {
-      this.scene.stop("Game");
-      this.scene.start("Game");
-    });
+this.createButton(512, 420, "Reiniciar", () => {
+  if (this.scene.isPaused("Game")) {
+    this.scene.stop("Game");
+    this.scene.start("Game");
+  }
+  if (this.scene.isPaused("Versus")) {
+    this.scene.stop("Versus");
+    this.scene.start("Versus");
+  }
+  this.scene.stop("PauseMenu");
+});
 
-    this.createButton(512, 480, "Salir al Menú", () => {
-      this.scene.stop("Game");
-      this.scene.start("MainMenu");
-    });
+this.createButton(512, 480, "Salir al Menú", () => {
+  if (this.scene.isPaused("Game")) this.scene.stop("Game");
+  if (this.scene.isPaused("Versus")) this.scene.stop("Versus");
+  this.scene.start("MainMenu");
+  this.scene.stop("PauseMenu");
+});
   }
 
   createButton(x, y, text, callback) {

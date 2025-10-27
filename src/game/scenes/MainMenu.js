@@ -58,7 +58,7 @@ export class MainMenu extends Scene {
         this.sound.context.resume();
         this.scene.start("Game");
       } else {
-        this.scene.start("GameOver");
+        this.scene.start("Versus");
       }
     });
 

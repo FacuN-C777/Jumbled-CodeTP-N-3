@@ -6,6 +6,9 @@ import { Preloader } from "./scenes/Preloader";
 import { PauseMenu } from "./scenes/PauseMenu";
 import { AUTO, Game } from "phaser";
 import { HUD } from "./scenes/HUD";
+import { Versus } from "./scenes/Versus";
+import { HUDVersus } from './scenes/HUDVersus.js'
+import { GameOverVersus } from "./scenes/GameOverVersus.js"
 
 //  Find out more information about the Game Config at:
 //  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
@@ -25,7 +28,7 @@ const config = {
     default: "arcade",
     arcade: { debug: false },
   },
-  scene: [Boot, Preloader, MainMenu, MainGame, GameOver, HUD, PauseMenu],
+  scene: [Boot, Preloader, MainMenu, MainGame, GameOver, HUD, PauseMenu,Versus, HUDVersus,GameOverVersus],
 };
 
 const StartGame = (parent) => {
