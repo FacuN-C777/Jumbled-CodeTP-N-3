@@ -127,6 +127,14 @@ export class Game extends Scene {
 
     this.sonidoDinero = this.sound.add("cashsound");
 
+    // Initialize round timing state and start the round timer so HUD receives updates.
+    this.roundActive = true;
+    this.roundInterval = false;
+    this.roundTime = 120;
+    this.intervalTime = 15;
+    this.timeLeft = this.roundTime;
+    this.startRoundTimer();
+
     // Spawn clients periodically
     this.time.addEvent({
       delay: 3000,
