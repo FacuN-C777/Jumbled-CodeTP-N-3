@@ -35,6 +35,7 @@ export class Preloader extends Scene {
     this.load.image("computadora", "object_laptop.png");
     this.load.image("audifonos", "object_headphones.png");
     this.load.image("lavarropa", "object_washMachine.png");
+    this.load.image("controles", "Controles.png");
 
     this.load.tilemapTiledJSON("betaMapCoop", "tilemaps/mapaBeta3.json");
     this.load.image("wallTiles", "modern_supermarket_indoor_wall_floor.png");
