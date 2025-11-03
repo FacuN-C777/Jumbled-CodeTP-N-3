@@ -68,8 +68,8 @@ export class MainMenu extends Scene {
       console.log("Idiomas");
     });
 
-    this.createButton(512, 485, "Sonidos", () => {
-      console.log("Sonidos");
+    this.createButton(512, 485, "Controles", () => {
+      this.scene.start("ControlsScene");
     });
 
     // Play main menu music (looped). Keep reference to stop later.
