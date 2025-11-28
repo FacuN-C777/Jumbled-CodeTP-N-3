@@ -1,8 +1,26 @@
 import { Scene } from "phaser";
+import keys from "../../utils/enums/keys";
+import { getTranslations, getPhrase } from "../../utils/Translations";
+import { DE, EN, ES, PT } from "../../enums/languages";
+import { FETCHED, FETCHING, READY, TODO } from "../../enums/status";
 
 export class MainMenu extends Scene {
+  #textSpanish;
+  #textGerman;
+  #textEnglish;
+  #textPortuguese;
+
+  #updatedTextInScene;
+  #updatedString = "Siguiente";
+  #wasChangedLanguage = TODO;
   constructor() {
     super("MainMenu");
+    const { play, coop, language, controls } = keys.sceneInitialMenu;
+    this.play = play;
+    this.coop = coop;
+    this.language = language;
+    this.controls = controls;
+    this.#updatedString = next;
   }
 
   create() {
@@ -32,7 +50,7 @@ export class MainMenu extends Scene {
       repeat: -1,
     });
 
-    this.selectedMode = "Cooperativo";
+    this.selectedMode = getPhrase(this.coop);
 
     // If a gamepad was connected before the scene started, Phaser may take a moment
     // to wrap it. Poll a few times so gp.pads becomes available for immediate navigation.
@@ -53,7 +71,7 @@ export class MainMenu extends Scene {
     }
 
     // create buttons (they will register themselves)
-    this.createButton(512, 305, "Jugar", () => {
+    this.createButton(512, 305, getPhrase(this.play), () => {
       if (this.selectedMode === "Cooperativo") {
         this.sound.context.resume();
         this.scene.start("Game");
@@ -64,11 +82,11 @@ export class MainMenu extends Scene {
 
     this.createModeSelector(512, 365);
 
-    this.createButton(512, 425, "Idiomas", () => {
+    this.createButton(512, 425, getPhrase(this.language), () => {
       console.log("Idiomas");
     });
 
-    this.createButton(512, 485, "Controles", () => {
+    this.createButton(512, 485, getPhrase(this.controls), () => {
       this.scene.start("ControlsScene");
     });
 
@@ -165,6 +183,10 @@ export class MainMenu extends Scene {
   }
 
   update() {
+    if (this.#wasChangedLanguage === FETCHED) {
+      this.#wasChangedLanguage = READY;
+      this.#updatedTextInScene.setText(getPhrase(this.#updatedString));
+    }
     // poll first connected pad (if any)
     const pads = this.input.gamepad ? this.input.gamepad.gamepads : [];
     const pad = pads && pads.length ? pads[0] : null;
@@ -235,13 +257,17 @@ export class MainMenu extends Scene {
 
     leftArrow.on("pointerdown", () => {
       this.selectedMode =
-        this.selectedMode === "Cooperativo" ? "Versus" : "Cooperativo";
+        this.selectedMode === getPhrase(this.coop)
+          ? "Versus"
+          : getPhrase(this.coop);
       modeText.setText(this.selectedMode);
     });
 
     rightArrow.on("pointerdown", () => {
       this.selectedMode =
-        this.selectedMode === "Cooperativo" ? "Versus" : "Cooperativo";
+        this.selectedMode === getPhrase(this.coop)
+          ? "Versus"
+          : getPhrase(this.coop);
       modeText.setText(this.selectedMode);
     });
 

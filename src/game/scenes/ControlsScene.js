@@ -1,16 +1,24 @@
 import { Scene } from "phaser";
+import keys from "../../utils/enums/keys";
+import { getTranslations, getPhrase } from "../../utils/Translations";
 
 export class ControlsScene extends Scene {
   constructor() {
     super("ControlsScene");
+    const { controls, move, stick, grabthroworder, back } =
+      keys.SceneGameControls;
+    this.controls = controls;
+    this.move = move;
+    this.stick = stick;
+    this.grabthroworder = grabthroworder;
+    this.back = back;
   }
 
   create() {
-    
     this.add.image(512, 384, "controles").setOrigin(0.5, 0.5);
 
-   const title = this.add
-      .text(512, 100, "CONTROLES", {
+    const title = this.add
+      .text(512, 100, getPhrase(this.controls), {
         fontFamily: "Arial",
         fontSize: "64px",
         color: "#00ffff",
@@ -26,19 +34,22 @@ export class ControlsScene extends Scene {
       repeat: -1,
     });
 
-        this.createButton(512, 680, "Volver", () => {
+    this.createButton(512, 680, getPhrase(this.back), () => {
       this.scene.start("MainMenu");
     });
   }
 
   createButton(x, y, text, callback) {
-    const buttonText = this.add.text(0, 0, text, {
-      fontFamily: "Arial",
-      fontSize: "32px",
-      color: "#ffffff",
-    }).setOrigin(0.5);
+    const buttonText = this.add
+      .text(0, 0, text, {
+        fontFamily: "Arial",
+        fontSize: "32px",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5);
 
-    const glow = this.add.rectangle(0, 0, buttonText.width + 40, 45, 0x000000, 0)
+    const glow = this.add
+      .rectangle(0, 0, buttonText.width + 40, 45, 0x000000, 0)
       .setStrokeStyle(2, 0x00ffff)
       .setOrigin(0.5);
 
@@ -58,6 +69,5 @@ export class ControlsScene extends Scene {
       repeat: -1,
       ease: "Sine.easeInOut",
     });
-
   }
 }

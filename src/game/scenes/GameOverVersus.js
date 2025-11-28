@@ -1,19 +1,25 @@
 import { Scene } from "phaser";
+import keys from "../../utils/enums/keys";
+import { getTranslations, getPhrase } from "../../utils/Translations";
 
 export class GameOverVersus extends Phaser.Scene {
   constructor() {
     super("GameOverVersus");
+    const { gamemover, winnert, totalscore, retry } = keys.sceneGameOverVs;
+    this.gamemover = gamemover;
+    this.winnert = winnert;
+    this.totalscore = totalscore;
+    this.retry = retry;
   }
 
   create(data) {
-    
     const { winner, money } = data;
 
     this.cameras.main.setBackgroundColor(0x0a0a0a);
     this.add.image(512, 384, "background").setAlpha(0.5);
 
     const title = this.add
-      .text(512, 200, "¡Juego Terminado!", {
+      .text(512, 200, getPhrase(this.gamemover), {
         fontFamily: "Arial",
         fontSize: "64px",
         color: "#00ffff",
@@ -30,7 +36,7 @@ export class GameOverVersus extends Phaser.Scene {
     });
 
     this.add
-      .text(512, 320, `Ganador: ${winner}`, {
+      .text(512, 320, getPhrase(this.winnert) + `: ${winner}`, {
         fontFamily: '"Press Start 2P", monospace',
         fontSize: "24px",
         color: "#ffffff",
@@ -38,7 +44,7 @@ export class GameOverVersus extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(512, 360, `Dinero obtenido: $${money}`, {
+      .text(512, 360, getPhrase(this.totalscore) + `: $${money}`, {
         fontFamily: '"Press Start 2P", monospace',
         fontSize: "24px",
         color: "#ffffff",
@@ -46,14 +52,13 @@ export class GameOverVersus extends Phaser.Scene {
       .setOrigin(0.5);
 
     const hint = this.add
-      .text(512, 440, "Presiona cualquier botón para volver al menú", {
+      .text(512, 440, getPhrase(this.retry), {
         fontFamily: '"Press Start 2P", monospace',
         fontSize: "16px",
         color: "#00ffff",
       })
       .setOrigin(0.5);
 
-   
     this.input.once("pointerdown", () => this.scene.start("MainMenu"));
     this.input.keyboard.once("keydown", () => this.scene.start("MainMenu"));
     if (this.input && this.input.gamepad) {

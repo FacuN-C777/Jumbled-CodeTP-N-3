@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import GameManager from "../../gameManager.js";
+import keys from "../../utils/enums/keys";
+import { getTranslations, getPhrase } from "../../utils/Translations";
 
 const OBJECT_TYPES = [
   "telefono",
@@ -12,6 +14,13 @@ const OBJECT_TYPES = [
 export class clients extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y, key) {
     super(scene, x, y, key);
+    const { ordert, o1, o2, o3, o4, o5 } = keys.classClientOrders;
+    this.ordert = ordert;
+    this.o1 = o1;
+    this.o2 = o2;
+    this.o3 = o3;
+    this.o4 = o4;
+    this.o5 = o5;
     this.scene = scene;
     this.scene.add.existing(this);
 
@@ -36,8 +45,8 @@ export class clients extends Phaser.GameObjects.Sprite {
     const firstLine = this.order.slice(0, splitIndex).join(", ");
     const secondLine = this.order.slice(splitIndex).join(", ");
     const textContent = secondLine
-      ? `Pedido:\n${firstLine}\n${secondLine}`
-      : `Pedido: ${firstLine}`;
+      ? getPhrase(this.ordert) + `:\n${firstLine}\n${secondLine}`
+      : getPhrase(this.ordert) + `: ${firstLine}`;
 
     this.orderText = this.scene.add
       .text(this.x, this.y - 40, textContent, {
