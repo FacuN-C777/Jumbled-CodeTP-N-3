@@ -1,9 +1,15 @@
 import { Scene } from "phaser";
 import GameManager from "../../gameManager.js";
+import keys from "../../enums/keys.js";
+import { getTranslations, getPhrase } from "../../services/translations.js";
 
 export class GameOver extends Scene {
   constructor() {
     super("GameOver");
+    const { roundsurvived, totalscore, retry } = keys.sceneGameOver;
+    this.roundsurvived = roundsurvived;
+    this.totalscore = totalscore;
+    this.retry = retry;
   }
 
   create() {
@@ -43,7 +49,7 @@ export class GameOver extends Scene {
     const total = GameManager.getInstance().getTotalMoney();
 
     this.add
-      .text(512, 320, `Rondas sobrevividas: ${rounds}`, {
+      .text(512, 320, getPhrase(this.roundsurvived) + `: ${rounds}`, {
         fontFamily: '"Press Start 2P", monospace',
         fontSize: "20px",
         color: "#ffffff",
@@ -51,7 +57,7 @@ export class GameOver extends Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(512, 360, `Dinero total: ${total}`, {
+      .text(512, 360, getPhrase(this.totalscore) + `: ${total}`, {
         fontFamily: '"Press Start 2P", monospace',
         fontSize: "20px",
         color: "#ffffff",
@@ -59,7 +65,7 @@ export class GameOver extends Scene {
       .setOrigin(0.5);
 
     const hint = this.add
-      .text(512, 440, "Presiona cualquier botón para volver al menú", {
+      .text(512, 440, getPhrase(this.retry), {
         fontFamily: '"Press Start 2P", monospace',
         fontSize: "16px",
         color: "#00ffff",

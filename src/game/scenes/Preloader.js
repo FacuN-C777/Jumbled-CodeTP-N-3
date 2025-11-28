@@ -1,6 +1,11 @@
 import { Scene } from "phaser";
+import {
+  getLanguageConfig,
+  getTranslations,
+} from "../../services/translations";
 
 export class Preloader extends Scene {
+  #language;
   constructor() {
     super("Preloader");
   }
@@ -19,6 +24,7 @@ export class Preloader extends Scene {
   }
 
   preload() {
+    this.#language = getLanguageConfig();
     //  Load the assets for the game - Replace with your own assets
     this.load.setPath("assets");
     this.load.image("client", "Client_sprite.png");
@@ -132,6 +138,8 @@ export class Preloader extends Scene {
         repeat: -1,
       });
     }
-    this.scene.start("MainMenu");
+    getTranslations(this.#language, () =>
+      this.scene.start("MainMenu", { language: this.#language })
+    );
   }
 }
