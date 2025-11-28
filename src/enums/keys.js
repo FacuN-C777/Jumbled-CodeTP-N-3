@@ -23,7 +23,7 @@ const classClientOrders = {
 const sceneInitialMenu = {
   play: "Jugar",
   coop: "Cooperativo",
-  language: "Idiomas",
+  languaget: "Idiomas",
   controls: "Controles",
 };
 

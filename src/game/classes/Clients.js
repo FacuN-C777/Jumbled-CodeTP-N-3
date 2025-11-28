@@ -40,14 +40,21 @@ export class clients extends Phaser.GameObjects.Sprite {
   displayOrder() {
     if (this.orderText) this.orderText.destroy();
 
+    // translate each object token for display
+    const translated = this.order.map((o) => {
+      const t = getPhrase(o);
+      return t || o;
+    });
+
     // split order into two roughly equal lines to avoid clipping with nearby clients
-    const splitIndex = Math.ceil(this.order.length / 2);
-    const firstLine = this.order.slice(0, splitIndex).join(", ");
-    const secondLine = this.order.slice(splitIndex).join(", ");
+    const splitIndex = Math.ceil(translated.length / 2);
+    const firstLine = translated.slice(0, splitIndex).join(", ");
+    const secondLine = translated.slice(splitIndex).join(", ");
     const textContent = secondLine
       ? getPhrase(this.ordert) + `:\n${firstLine}\n${secondLine}`
       : getPhrase(this.ordert) + `: ${firstLine}`;
 
+    this._lastRenderedOrder = textContent;
     this.orderText = this.scene.add
       .text(this.x, this.y - 40, textContent, {
         fontSize: "20px",
@@ -88,6 +95,23 @@ export class clients extends Phaser.GameObjects.Sprite {
     if (this.orderText) {
       this.orderText.x = this.x;
       this.orderText.y = this.y - 40;
+
+      // Rebuild translated text and update only if changed (handles language switches)
+      const translated = this.order.map((o) => {
+        const t = getPhrase(o);
+        return t || o;
+      });
+      const splitIndex = Math.ceil(translated.length / 2);
+      const firstLine = translated.slice(0, splitIndex).join(", ");
+      const secondLine = translated.slice(splitIndex).join(", ");
+      const textContent = secondLine
+        ? getPhrase(this.ordert) + `:\n${firstLine}\n${secondLine}`
+        : getPhrase(this.ordert) + `: ${firstLine}`;
+
+      if (textContent !== this._lastRenderedOrder) {
+        this._lastRenderedOrder = textContent;
+        this.orderText.setText(textContent);
+      }
     }
   }
 

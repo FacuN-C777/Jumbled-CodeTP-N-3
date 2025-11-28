@@ -15,14 +15,25 @@ export class MainMenu extends Scene {
   #wasChangedLanguage = TODO;
   constructor() {
     super("MainMenu");
-    const { play, coop, language, controls } = keys.sceneInitialMenu;
+    const { play, coop, languaget, controls } = keys.sceneInitialMenu;
     this.play = play;
     this.coop = coop;
-    this.language = language;
+    this.languaget = languaget;
     this.controls = controls;
     //this.#updatedString = next;
   }
 
+  init({ language }) {
+    // Prefer explicit param, then persisted choice, then default
+    const persisted = (() => {
+      try {
+        return localStorage.getItem("jumbled_lang");
+      } catch (e) {
+        return null;
+      }
+    })();
+    this.currentLanguage = language || persisted || ES;
+  }
   create() {
     this.cameras.main.setBackgroundColor(0x0a0a0a);
 
@@ -71,8 +82,8 @@ export class MainMenu extends Scene {
     }
 
     // create buttons (they will register themselves)
-    this.createButton(512, 305, getPhrase(this.play), () => {
-      if (this.selectedMode === "Cooperativo") {
+    this.playbutton = this.createButton(512, 305, getPhrase(this.play), () => {
+      if (this.selectedMode === getPhrase(this.coop)) {
         this.sound.context.resume();
         this.scene.start("Game");
       } else {
@@ -82,17 +93,24 @@ export class MainMenu extends Scene {
 
     this.createModeSelector(512, 365);
 
-    this.createButton(512, 425, getPhrase(this.language), () => {
-      if (this.#wasChangedLanguage === FETCHED) {
-        this.#wasChangedLanguage = READY;
-        this.#updatedTextInScene.setText(getPhrase(this.#updatedString));
+    this.languagebutton = this.createButton(
+      512,
+      425,
+      getPhrase(this.languaget),
+      () => {
+        const newLang = this.currentLanguage === EN ? ES : EN;
+        this.getTranslations(newLang);
       }
-      console.log("Idiomas");
-    });
+    );
 
-    this.createButton(512, 485, getPhrase(this.controls), () => {
-      this.scene.start("ControlsScene");
-    });
+    this.controlbutton = this.createButton(
+      512,
+      485,
+      getPhrase(this.controls),
+      () => {
+        this.scene.start("ControlsScene");
+      }
+    );
 
     // Play main menu music (looped). Keep reference to stop later.
     if (!this.bgMusic) {
@@ -131,6 +149,7 @@ export class MainMenu extends Scene {
     const button = this.add.container(x, y, [glow, buttonText]);
     button.setSize(glow.width, glow.height);
     button.setInteractive({ useHandCursor: true });
+    button.buttonText = buttonText;
 
     // attach callback for gamepad-triggered "click"
     button._callback = callback;
@@ -160,13 +179,14 @@ export class MainMenu extends Scene {
     });
 
     // override the Play button callback to stop menu music before switching
-    if (text === "Jugar") {
+    if (text === getPhrase(this.play)) {
       const original = callback;
       callback = () => {
         if (this.bgMusic && this.bgMusic.isPlaying) this.bgMusic.stop();
         original();
       };
     }
+    return button;
   }
 
   // update selection visual
@@ -189,7 +209,11 @@ export class MainMenu extends Scene {
   update() {
     if (this.#wasChangedLanguage === FETCHED) {
       this.#wasChangedLanguage = READY;
-      this.#updatedTextInScene.setText(getPhrase(this.#updatedString));
+      //this.#updatedTextInScene.setText(getPhrase(this.#updatedString));
+      this.playbutton.buttonText.setText(getPhrase(this.play));
+      // use languageKey (label key) to set the button text, not the language code
+      this.languagebutton.buttonText.setText(getPhrase(this.languaget));
+      this.controlbutton.buttonText.setText(getPhrase(this.controls));
     }
     // poll first connected pad (if any)
     const pads = this.input.gamepad ? this.input.gamepad.gamepads : [];
@@ -299,9 +323,11 @@ export class MainMenu extends Scene {
   };
 
   async getTranslations(language) {
-    this.language = language;
     this.#wasChangedLanguage = FETCHING;
-
     await getTranslations(language, this.updateWasChangedLanguage);
+    this.currentLanguage = language;
+    try {
+      localStorage.setItem("jumbled_lang", language);
+    } catch (e) {}
   }
 }

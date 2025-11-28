@@ -63,7 +63,6 @@ export default class Objects {
       "audifonos",
       "lavarropa",
     ]);
-    console.log(type);
 
     const obj = this.scene.physics.add.sprite(x, y, type);
     obj.setScale(1.5);
