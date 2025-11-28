@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
-import keys from "../../utils/enums/keys";
-import { getTranslations, getPhrase } from "../../utils/Translations";
+import keys from "../../enums/keys.js";
+import { getTranslations, getPhrase } from "../../services/translations.js";
 
 export class GameOverVersus extends Phaser.Scene {
   constructor() {

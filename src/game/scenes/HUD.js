@@ -1,11 +1,11 @@
 import { Scene } from "phaser";
-import keys from "../../utils/enums/keys";
-import { getTranslations, getPhrase } from "../../utils/Translations";
+import keys from "../../enums/keys.js";
+import { getTranslations, getPhrase } from "../../services/translations.js";
 
 export class HUD extends Scene {
   constructor() {
     super("HUD");
-    const { score, round, goal, timer } = keys.SceneGameCoop;
+    const { score, round, goal, timer } = keys.sceneGameCoop;
     this.score = score;
     this.round = round;
     this.goal = goal;

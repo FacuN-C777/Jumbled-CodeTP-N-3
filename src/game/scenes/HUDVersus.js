@@ -1,11 +1,11 @@
 import { Scene } from "phaser";
-import keys from "../../utils/enums/keys";
-import { getTranslations, getPhrase } from "../../utils/Translations";
+import keys from "../../enums/keys.js";
+import { getTranslations, getPhrase } from "../../services/translations.js";
 
 export class HUDVersus extends Scene {
   constructor() {
     super("HUDVersus");
-    const { player, timer } = keys.SceneGameVs;
+    const { player, timer } = keys.sceneGameVs;
     this.player = player;
     this.timer = timer;
     this.moneyPlayer1 = 0;

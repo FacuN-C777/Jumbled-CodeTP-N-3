@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
-import keys from "../../utils/enums/keys";
-import { getTranslations, getPhrase } from "../../utils/Translations";
+import keys from "../../enums/keys.js";
+import { getTranslations, getPhrase } from "../../services/translations.js";
 import { DE, EN, ES, PT } from "../../enums/languages";
 import { FETCHED, FETCHING, READY, TODO } from "../../enums/status";
 
@@ -20,7 +20,7 @@ export class MainMenu extends Scene {
     this.coop = coop;
     this.language = language;
     this.controls = controls;
-    this.#updatedString = next;
+    //this.#updatedString = next;
   }
 
   create() {
@@ -83,6 +83,10 @@ export class MainMenu extends Scene {
     this.createModeSelector(512, 365);
 
     this.createButton(512, 425, getPhrase(this.language), () => {
+      if (this.#wasChangedLanguage === FETCHED) {
+        this.#wasChangedLanguage = READY;
+        this.#updatedTextInScene.setText(getPhrase(this.#updatedString));
+      }
       console.log("Idiomas");
     });
 
@@ -288,5 +292,16 @@ export class MainMenu extends Scene {
       repeat: -1,
       ease: "Sine.easeInOut",
     });
+  }
+
+  updateWasChangedLanguage = () => {
+    this.#wasChangedLanguage = FETCHED;
+  };
+
+  async getTranslations(language) {
+    this.language = language;
+    this.#wasChangedLanguage = FETCHING;
+
+    await getTranslations(language, this.updateWasChangedLanguage);
   }
 }

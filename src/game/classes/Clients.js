@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import GameManager from "../../gameManager.js";
-import keys from "../../utils/enums/keys";
-import { getTranslations, getPhrase } from "../../utils/Translations";
+import keys from "../../enums/keys.js";
+import { getTranslations, getPhrase } from "../../services/translations.js";
 
 const OBJECT_TYPES = [
   "telefono",

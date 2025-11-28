@@ -1,12 +1,12 @@
 import { Scene } from "phaser";
-import keys from "../../utils/enums/keys";
-import { getTranslations, getPhrase } from "../../utils/Translations";
+import keys from "../../enums/keys.js";
+import { getTranslations, getPhrase } from "../../services/translations.js";
 
 export class ControlsScene extends Scene {
   constructor() {
     super("ControlsScene");
     const { controls, move, stick, grabthroworder, back } =
-      keys.SceneGameControls;
+      keys.sceneGameControls;
     this.controls = controls;
     this.move = move;
     this.stick = stick;
