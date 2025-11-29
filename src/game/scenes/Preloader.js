@@ -139,7 +139,7 @@ export class Preloader extends Scene {
       });
     }
     getTranslations(this.#language, () =>
-      this.scene.start("MainMenu", { language: this.#language })
+      this.scene.start("Login", { language: this.#language })
     );
   }
 }

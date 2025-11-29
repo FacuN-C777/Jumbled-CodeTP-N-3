@@ -19,7 +19,7 @@ export class ControlsScene extends Scene {
 
     const title = this.add
       .text(512, 100, getPhrase(this.controls), {
-        fontFamily: "Arial",
+        fontFamily: '"Press Start 2P", monospace',
         fontSize: "64px",
         color: "#00ffff",
         fontStyle: "bold",
@@ -42,7 +42,7 @@ export class ControlsScene extends Scene {
   createButton(x, y, text, callback) {
     const buttonText = this.add
       .text(0, 0, text, {
-        fontFamily: "Arial",
+        fontFamily: '"Press Start 2P", monospace',
         fontSize: "32px",
         color: "#ffffff",
       })
