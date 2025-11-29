@@ -22,8 +22,14 @@ export class Versus extends Scene {
     const furnitureLayer = map.createLayer("Muebles", muebles, 0, 0);
     const objectsLayer = map.getObjectLayer("Objetos");
 
-    const spawnPoint1 = map.findObject("Objetos", (obj) => obj.name === "Jugador1");
-    const spawnPoint2 = map.findObject("Objetos", (obj) => obj.name === "Jugador2");
+    const spawnPoint1 = map.findObject(
+      "Objetos",
+      (obj) => obj.name === "Jugador1"
+    );
+    const spawnPoint2 = map.findObject(
+      "Objetos",
+      (obj) => obj.name === "Jugador2"
+    );
 
     this.cameras.main.setBackgroundColor(0x111111);
 
@@ -36,11 +42,12 @@ export class Versus extends Scene {
     this.objectSpawnLocations = [];
 
     objectsLayer.objects.forEach((objData) => {
-      if (objData.type === "objects_spawn") this.objectSpawnLocations.push(objData);
-      if (objData.type === "clients_spawn") this.ClientSpawnLocations.push(objData);
+      if (objData.type === "objects_spawn")
+        this.objectSpawnLocations.push(objData);
+      if (objData.type === "clients_spawn")
+        this.ClientSpawnLocations.push(objData);
     });
 
-    
     if (this.input && this.input.gamepad) {
       const gp = this.input.gamepad;
       if (typeof gp.removeAllListeners === "function") {
@@ -53,8 +60,8 @@ export class Versus extends Scene {
           attempts++;
           const pads = gp.pads || [];
           if (pads.length > 0 || attempts > 10) {
-            this.player1.inputSystem.gamepad = pads[0] || null;
-            this.player2.inputSystem.gamepad = pads[1] || null;
+            this.player1.inputHandler.inputSystem.gamepad = pads[0] || null;
+            this.player2.inputHandler.inputSystem.gamepad = pads[1] || null;
             return;
           }
           this.time.delayedCall(100, tryAssignPads);
@@ -62,12 +69,16 @@ export class Versus extends Scene {
       })();
       tryAssignPads();
       gp.on("connected", (pad) => {
-        if (pad.index === 0) this.player1.inputSystem.gamepad = pad;
-        if (pad.index === 1) this.player2.inputSystem.gamepad = pad;
+        if (pad.index === 0)
+          this.player1.inputHandler.inputSystem.gamepad = pad;
+        if (pad.index === 1)
+          this.player2.inputHandler.inputSystem.gamepad = pad;
       });
       gp.on("disconnected", (pad) => {
-        if (pad.index === 0) this.player1.inputSystem.gamepad = null;
-        if (pad.index === 1) this.player2.inputSystem.gamepad = null;
+        if (pad.index === 0)
+          this.player1.inputHandler.inputSystem.gamepad = null;
+        if (pad.index === 1)
+          this.player2.inputHandler.inputSystem.gamepad = null;
       });
     }
 
@@ -83,7 +94,6 @@ export class Versus extends Scene {
     this.clientsGroup = this.add.group();
     this.physics.add.collider(this.player1, this.player2);
 
-   
     if (this.scene.isActive("HUDVersus")) this.scene.stop("HUDVersus");
     this.scene.launch("HUDVersus");
     this.hud = this.scene.get("HUDVersus");
@@ -93,41 +103,66 @@ export class Versus extends Scene {
       if (this.coopMusic && this.coopMusic.isPlaying) this.coopMusic.stop();
     });
 
-   
-    try { this.sound.stopByKey("MainMenuMusic"); } catch (e) {}
-    this.coopMusic = this.sound.add("CoopModeMusic", { loop: true, volume: 0.2 });
-    try { this.coopMusic.play(); } catch (e) {}
+    try {
+      this.sound.stopByKey("MainMenuMusic");
+    } catch (e) {}
+    this.coopMusic = this.sound.add("CoopModeMusic", {
+      loop: true,
+      volume: 0.2,
+    });
+    try {
+      this.coopMusic.play();
+    } catch (e) {}
 
     this.sonidoDinero = this.sound.add("cashsound");
 
-   
-    this.time.addEvent({ delay: 3000, loop: true, callback: () => clients.spawn(this, 48) });
+    this.time.addEvent({
+      delay: 3000,
+      loop: true,
+      callback: () => clients.spawn(this, 48),
+    });
     this.input.keyboard.on("keydown-ESC", () => {
       this.scene.launch("PauseMenu");
       this.scene.pause();
       if (this.coopMusic && this.coopMusic.isPlaying) this.coopMusic.pause();
     });
-    this.events.on("resume", () => { if (this.coopMusic && this.coopMusic.isPaused) this.coopMusic.resume(); });
+    this.events.on("resume", () => {
+      if (this.coopMusic && this.coopMusic.isPaused) this.coopMusic.resume();
+    });
 
-  
-    const originalTryDeliver = Player.prototype.tryDeliverToClient;
-    Player.prototype.tryDeliverToClient = function () {
-      let delivered = originalTryDeliver.apply(this, arguments);
+    const scene = this;
+    const cashPerDelivery = 10;
+
+    const origDeliver1 = this.player1.objectInteraction.tryDeliverToClient.bind(
+      this.player1.objectInteraction
+    );
+    this.player1.objectInteraction.tryDeliverToClient = function () {
+      const delivered = origDeliver1();
       if (delivered) {
-        const cash = 10;
-        if (this.playerNumber === 1) {
-          this.scene.moneyPlayer1 += cash;
-          this.scene.hud.updateMoney(1, this.scene.moneyPlayer1);
-        } else if (this.playerNumber === 2) {
-          this.scene.moneyPlayer2 += cash;
-          this.scene.hud.updateMoney(2, this.scene.moneyPlayer2);
+        scene.moneyPlayer1 += cashPerDelivery;
+        if (scene.hud && typeof scene.hud.updateMoney === "function") {
+          scene.hud.updateMoney(1, scene.moneyPlayer1);
         }
-        if (this.scene.sonidoDinero) this.scene.sonidoDinero.play();
+        if (scene.sonidoDinero) scene.sonidoDinero.play();
       }
       return delivered;
     };
 
-   
+    const origDeliver2 = this.player2.objectInteraction.tryDeliverToClient.bind(
+      this.player2.objectInteraction
+    );
+    this.player2.objectInteraction.tryDeliverToClient = function () {
+      const delivered = origDeliver2();
+      if (delivered) {
+        scene.moneyPlayer2 += cashPerDelivery;
+        if (scene.hud && typeof scene.hud.updateMoney === "function") {
+          scene.hud.updateMoney(2, scene.moneyPlayer2);
+        }
+        if (scene.sonidoDinero) scene.sonidoDinero.play();
+      }
+      return delivered;
+    };
+
     this.roundTime = 60;
     this.timeLeft = this.roundTime;
     this.startRoundTimer();
@@ -149,28 +184,27 @@ export class Versus extends Scene {
         this.timeLeft--;
         if (this.hud) this.hud.updateRoundTimer(this.timeLeft);
         if (this.timeLeft <= 0) this.endRound();
-      }
+      },
     });
   }
 
   endRound() {
-  if (this.timer) this.timer.remove();
+    if (this.timer) this.timer.remove();
 
-  
-  let winner = "Empate";
-  let money = 0;
+    let winner = "Empate";
+    let money = 0;
 
-  if (this.moneyPlayer1 > this.moneyPlayer2) {
-    winner = "Jugador 1";
-    money = this.moneyPlayer1;
-  } else if (this.moneyPlayer2 > this.moneyPlayer1) {
-    winner = "Jugador 2";
-    money = this.moneyPlayer2;
-  } else {
-    winner = "Empate";
-    money = this.moneyPlayer1; 
+    if (this.moneyPlayer1 > this.moneyPlayer2) {
+      winner = "Jugador 1";
+      money = this.moneyPlayer1;
+    } else if (this.moneyPlayer2 > this.moneyPlayer1) {
+      winner = "Jugador 2";
+      money = this.moneyPlayer2;
+    } else {
+      winner = "Empate";
+      money = this.moneyPlayer1;
+    }
+
+    this.scene.start("GameOverVersus", { winner, money });
   }
-
- this.scene.start("GameOverVersus", { winner, money });
-}
 }
