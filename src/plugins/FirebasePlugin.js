@@ -22,7 +22,7 @@ import {
 } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBecBPsxcu5nOEO8fJCRnWg8yc4UUcEK6k",
+  apiKey: import.meta.env.VITE_APIKEY,
   authDomain: "jumbled-code-p.firebaseapp.com",
   projectId: "jumbled-code-p",
   storageBucket: "jumbled-code-p.firebasestorage.app",
